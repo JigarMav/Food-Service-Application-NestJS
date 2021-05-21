@@ -1,15 +1,19 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { Restaurant } from './restaurants/entities/restaurant.entity';
-import { RestaurantsModule } from './restaurants/restaurants.module';
 import { UserModule } from './user/user.module';
 import { CommonUtilModule } from './common-util/common-util.module';
 import { User } from './user/entities/user.entity';
+import { JwtModule } from './jwt/jwt.module';
+import { JwtMiddleware } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
 const Joi = require('joi');
 
 @Module({
@@ -20,6 +24,7 @@ const Joi = require('joi');
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      context: ({ req }) => ({ user: req['user'] }),
     }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -29,14 +34,26 @@ const Joi = require('joi');
       password: 'root',
       database: 'food-delivery',
       entities: [User],
+
       synchronize: true,
       logging: true,
     }),
 
     UserModule,
     CommonUtilModule,
+    JwtModule.forRoot({
+      privateKey: process.env.SECRET_KEY,
+    }),
+    AuthModule,
   ],
   controllers: [],
   providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(JwtMiddleware).forRoutes({
+      path: '*',
+      method: RequestMethod.ALL,
+    });
+  }
+}

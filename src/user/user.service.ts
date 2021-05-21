@@ -1,16 +1,24 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from 'src/jwt/jwt.service';
 import { Repository } from 'typeorm';
 import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
+const jwt = require('jsonwebtoken');
 
 // injectable of repos .DI
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private readonly user: Repository<User>,
-  ) {}
+    private readonly config: ConfigService,
+    private readonly jwtService: JwtService,
+  ) {
+    console.log(this.config.get('SECRET_KEY'));
+    this.jwtService.hello();
+  }
 
   async createAccount({
     email,
@@ -48,9 +56,10 @@ export class UserService {
           error: 'Wrong password ',
         };
       }
+      const token = this.jwtService.sign(user.id);
       return {
         ok: true,
-        token: 'logged in',
+        token,
       };
     } catch (error) {
       console.log(error);
@@ -59,5 +68,27 @@ export class UserService {
         error,
       };
     }
+  }
+
+  async findById(id: number): Promise<User> {
+    console.log(id);
+
+    try {
+      const user = await this.user.findOne({ id });
+      return user;
+    } catch (error) {
+      console.log('  dfjskdfslf ');
+    }
+    return null;
+
+    // try {
+    //   const user = await this.user.findOneOrFail({ id });
+    //   return {
+    //     ok: true,
+    //     user,
+    //   };
+    // } catch (error) {
+    //   return { ok: false, error: 'User Not Found' };
+    // }
   }
 }
