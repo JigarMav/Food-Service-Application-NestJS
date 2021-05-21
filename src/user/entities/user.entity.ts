@@ -6,7 +6,7 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { CoreUtil } from 'src/common-util/enitites/coreUtil.entity';
-import { BeforeInsert, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 // type UserRole = 'client' | 'owner' | 'delivery';
@@ -37,11 +37,13 @@ export class User extends CoreUtil {
   role: Role;
 
   @BeforeInsert()
-  // @BeforeUpdate()
+  @BeforeUpdate()
   async hashPassword(): Promise<void> {
+    // console.log('called for pass', this.password);
     if (this.password) {
       try {
         this.password = await bcrypt.hash(this.password, 10);
+        // console.log('after crypt for pass', this.password);
       } catch (e) {
         console.log(e);
         throw new InternalServerErrorException();

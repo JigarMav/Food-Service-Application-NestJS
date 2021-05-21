@@ -24,6 +24,9 @@ const Joi = require('joi');
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      // context is prop used to send info to all the resolvers.
+      // it is called on every request
+      // req is http req object
       context: ({ req }) => ({ user: req['user'] }),
     }),
     TypeOrmModule.forRoot({
@@ -36,7 +39,7 @@ const Joi = require('joi');
       entities: [User],
 
       synchronize: true,
-      logging: true,
+      logging: false,
     }),
 
     UserModule,

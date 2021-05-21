@@ -4,7 +4,6 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 @Injectable()
 export class AuthGuard implements CanActivate {
   canActivate(context: ExecutionContext) {
-    // console.log(context);
     // current context is in HTTP .
     // convert to graphql context.
     const gqlContext = GqlExecutionContext.create(context).getContext();

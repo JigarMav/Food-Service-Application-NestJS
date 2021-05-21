@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from 'src/jwt/jwt.service';
 import { Repository } from 'typeorm';
 import { CreateAccountInput } from './dtos/create-account.dto';
+import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 const jwt = require('jsonwebtoken');
@@ -71,10 +72,10 @@ export class UserService {
   }
 
   async findById(id: number): Promise<User> {
-    console.log(id);
+    // console.log(id);
 
     try {
-      const user = await this.user.findOne({ id });
+      const user = await this.user.findOneOrFail({ id });
       return user;
     } catch (error) {
       console.log('  dfjskdfslf ');
@@ -90,5 +91,27 @@ export class UserService {
     // } catch (error) {
     //   return { ok: false, error: 'User Not Found' };
     // }
+  }
+
+  async editProfile(
+    id: number,
+    editprofileInput: EditProfileInput,
+  ): Promise<User> {
+    const { email, password } = editprofileInput;
+
+    const currUser = await this.user.findOne(id);
+    // console.log(currUser);
+    // console.log(password);
+    if (email) {
+      currUser.email = email;
+    }
+    if (password) {
+      currUser.password = password;
+    }
+    console.log('updated', currUser);
+    return this.user.save(currUser);
+    // return {
+    //   ok: true,
+    // };
   }
 }
