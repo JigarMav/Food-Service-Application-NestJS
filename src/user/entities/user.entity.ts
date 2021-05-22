@@ -6,21 +6,24 @@ import {
   registerEnumType,
 } from '@nestjs/graphql';
 import { CoreUtil } from 'src/common-util/enitites/coreUtil.entity';
-import { BeforeInsert, BeforeUpdate, Column, Entity } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 
 // type UserRole = 'client' | 'owner' | 'delivery';
-enum Role {
-  client,
-  owner,
-  delivery,
-  admin,
+export enum Role {
+  Client = 'Client',
+  Owner = 'Owner',
+  Delivery = 'Delivery',
+  Admin = 'Admin',
 }
 registerEnumType(Role, {
   name: 'Role',
 });
 
-@InputType({ isAbstract: true })
+// relationships are based on ObjectType hence to avoid name confusion, we rename InputTYpe
+
+@InputType('UserInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class User extends CoreUtil {
@@ -35,6 +38,11 @@ export class User extends CoreUtil {
   @Column({ type: 'enum', enum: Role })
   @Field((type) => Role)
   role: Role;
+
+  // owner has multiple restaurants.
+  @Field((type) => [Restaurant])
+  @OneToMany((type) => Restaurant, (restaurant) => restaurant.owner)
+  restaurants: Restaurant[];
 
   @BeforeInsert()
   @BeforeUpdate()

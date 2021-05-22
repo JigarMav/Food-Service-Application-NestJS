@@ -14,6 +14,9 @@ import { User } from './user/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
+import { Restaurant } from './restaurants/entities/restaurant.entity';
+import { Category } from './restaurants/entities/category.entity';
+import { RestaurantsModule } from './restaurants/restaurants.module';
 const Joi = require('joi');
 
 @Module({
@@ -27,6 +30,7 @@ const Joi = require('joi');
       // context is prop used to send info to all the resolvers.
       // it is called on every request
       // req is http req object
+
       context: ({ req }) => ({ user: req['user'] }),
     }),
     TypeOrmModule.forRoot({
@@ -36,18 +40,18 @@ const Joi = require('joi');
       username: 'root',
       password: 'root',
       database: 'food-delivery',
-      entities: [User],
+      entities: [User, Restaurant, Category],
 
       synchronize: true,
       logging: false,
     }),
-
-    UserModule,
-    CommonUtilModule,
     JwtModule.forRoot({
       privateKey: process.env.SECRET_KEY,
     }),
+    UserModule,
+    CommonUtilModule,
     AuthModule,
+    RestaurantsModule,
   ],
   controllers: [],
   providers: [],

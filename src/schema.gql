@@ -2,13 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type User {
+type Category {
   id: Float!
   createdAt: DateTime!
   updatedAt: DateTime!
-  email: String!
-  password: String!
-  role: Role!
+  name: String!
+  coverImg: String
+  slug: String!
+  restaurants: [Restaurant!]
+  restaurantCount: Int!
 }
 
 """
@@ -16,11 +18,32 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Restaurant {
+  id: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  name: String!
+  address: String!
+  coverImg: String
+  owner: User!
+  category: Category
+}
+
+type User {
+  id: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  email: String!
+  password: String!
+  role: Role!
+  restaurants: [Restaurant!]!
+}
+
 enum Role {
-  client
-  owner
-  delivery
-  admin
+  Client
+  Owner
+  Delivery
+  Admin
 }
 
 type CreateAccountOutput {
@@ -45,16 +68,95 @@ type UserProfileOutput {
   user: User
 }
 
+type AllCategoriesOutput {
+  error: String
+  ok: Boolean!
+  categories: [Category!]
+}
+
+type CategoryOutput {
+  error: String
+  ok: Boolean!
+  totalPages: Int
+  totalResults: Int
+  restaurants: [Restaurant!]
+  category: Category
+}
+
+type CreateRestaurantOutput {
+  error: String
+  ok: Boolean!
+  restaurantId: Int!
+}
+
+type DeleteRestaurantOutput {
+  error: String
+  ok: Boolean!
+}
+
+type EditRestaurantOutput {
+  error: String
+  ok: Boolean!
+}
+
+type RestaurantOutput {
+  error: String
+  ok: Boolean!
+  restaurant: Restaurant
+}
+
+type RestaurantsOutput {
+  error: String
+  ok: Boolean!
+  totalPages: Int
+  totalResults: Int
+  results: [Restaurant!]
+}
+
+type SearchRestaurantOutput {
+  error: String
+  ok: Boolean!
+  totalPages: Int
+  totalResults: Int
+  restaurants: [Restaurant!]
+}
+
 type Query {
   hello: Boolean!
   me: User!
   userProfile(id: Float!): UserProfileOutput!
+  restaurants(input: RestaurantsInput!): RestaurantsOutput!
+  restaurant(input: RestaurantInput!): RestaurantOutput!
+  searchRestaurant(input: SearchRestaurantInput!): SearchRestaurantOutput!
+  allCategories: AllCategoriesOutput!
+  category(input: CategoryInput!): CategoryOutput!
+}
+
+input RestaurantsInput {
+  page: Int = 1
+}
+
+input RestaurantInput {
+  restaurantId: Int!
+}
+
+input SearchRestaurantInput {
+  page: Int = 1
+  query: String!
+}
+
+input CategoryInput {
+  page: Int = 1
+  slug: String!
 }
 
 type Mutation {
   createAccount(input: CreateAccountInput!): CreateAccountOutput!
   login(input: LoginInput!): LoginOutput!
   editProfile(input: EditProfileInput!): EditProfileOutput!
+  createRestaurant(input: CreateRestaurantInput!): CreateRestaurantOutput!
+  editRestaurant(input: EditRestaurantInput!): EditRestaurantOutput!
+  deleteRestaurant(input: DeleteRestaurantInput!): DeleteRestaurantOutput!
 }
 
 input CreateAccountInput {
@@ -71,4 +173,23 @@ input LoginInput {
 input EditProfileInput {
   email: String
   password: String
+}
+
+input CreateRestaurantInput {
+  name: String!
+  address: String!
+  coverImg: String
+  categoryName: String!
+}
+
+input EditRestaurantInput {
+  name: String
+  address: String
+  coverImg: String
+  categoryName: String
+  restaurantId: Float!
+}
+
+input DeleteRestaurantInput {
+  restaurantId: Float!
 }

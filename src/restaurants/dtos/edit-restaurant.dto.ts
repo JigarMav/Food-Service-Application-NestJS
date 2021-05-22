@@ -1,18 +1,12 @@
-import { Field, InputType, PartialType } from '@nestjs/graphql';
-import { CreateRestaurantDto } from './create-restaurant.dto';
-
-// EditRestaurantInput partialtype so as all args become optional as we can edit any field.
-@InputType()
-export class EditRestaurantInput extends PartialType(CreateRestaurantDto) {}
-
-// takes 2 args in controller.
-// id and input of type EditRestaurantInput.
+import { InputType, PartialType, ObjectType, Field } from '@nestjs/graphql';
+import { CoreOutput } from 'src/common-util/dtos/outputUtil.dto';
+import { CreateRestaurantInput } from './create-restaurant.dto';
 
 @InputType()
-export class EditRestaurantDto {
+export class EditRestaurantInput extends PartialType(CreateRestaurantInput) {
   @Field((type) => Number)
-  id: number;
-
-  @Field((type) => EditRestaurantInput)
-  data: EditRestaurantInput;
+  restaurantId: number;
 }
+
+@ObjectType()
+export class EditRestaurantOutput extends CoreOutput {}

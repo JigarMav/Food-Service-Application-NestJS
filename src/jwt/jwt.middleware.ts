@@ -12,8 +12,10 @@ export class JwtMiddleware implements NestMiddleware {
   ) {}
   async use(req: Request, res: Response, next: NextFunction) {
     // extract data from http header.
+    // console.log(req.headers);
     if ('x-jwt' in req.headers) {
       const token = req.headers['x-jwt'];
+      // console.log(token);
       try {
         // verify the jwt token
         const decoded = this.jwtService.verify(token);
@@ -23,7 +25,9 @@ export class JwtMiddleware implements NestMiddleware {
           // get the user by id
           const user = await this.userService.findById(id);
           // attach it to the request object
+          // console.log(user.email);
           req['user'] = user;
+          // console.log(req['user']);
         }
       } catch (e) {
         console.log(e);
