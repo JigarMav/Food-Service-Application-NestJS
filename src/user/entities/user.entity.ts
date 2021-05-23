@@ -9,6 +9,7 @@ import { CoreUtil } from 'src/common-util/enitites/coreUtil.entity';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { Order } from 'src/orders/entities/order.entity';
 
 // type UserRole = 'client' | 'owner' | 'delivery';
 export enum Role {
@@ -39,10 +40,20 @@ export class User extends CoreUtil {
   @Field((type) => Role)
   role: Role;
 
-  // owner has multiple restaurants.
+  // user:owner has multiple restaurants.
   @Field((type) => [Restaurant])
   @OneToMany((type) => Restaurant, (restaurant) => restaurant.owner)
   restaurants: Restaurant[];
+
+  // user:Client has multiple orders
+  @Field((type) => [Order])
+  @OneToMany((type) => Order, (order) => order.customer)
+  orders: Order[];
+
+  // user:Driver can deliver multiple orders.
+  @Field((type) => [Order])
+  @OneToMany((type) => Order, (order) => order.driver)
+  rides: Order[];
 
   @BeforeInsert()
   @BeforeUpdate()

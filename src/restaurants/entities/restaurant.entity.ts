@@ -1,16 +1,20 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { type } from 'os';
 import { CoreUtil } from 'src/common-util/enitites/coreUtil.entity';
+import { Order } from 'src/orders/entities/order.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   RelationId,
   Unique,
 } from 'typeorm';
 import { Category } from './category.entity';
+import { Dish } from './dish.entity';
 
 // reused by gql and orm at same time
 
@@ -40,12 +44,14 @@ export class Restaurant extends CoreUtil {
   // owner can have many restaurants.
   @Field((type) => User)
   @ManyToOne((type) => User, (user) => user.restaurants, {
+    // delete restaurant if owner is deleted
     onDelete: 'CASCADE',
   })
   owner: User;
 
   @RelationId((restaurant: Restaurant) => restaurant.owner)
   ownerId: number;
+
   // A restaurant can have only one category but category can have many restaurants.
   //   if category is deleted , dont delete the restaurants.
   @Field((type) => Category, { nullable: true })
@@ -55,4 +61,14 @@ export class Restaurant extends CoreUtil {
     eager: true,
   })
   category: Category;
+
+  // restro has multiple dishes.
+  @Field((type) => [Dish])
+  @OneToMany((on) => Dish, (dish) => dish.restaurant)
+  menu: Dish[];
+
+  // restro has multiple orders.
+  @Field((type) => [Order])
+  @OneToMany((type) => Order, (order) => order.restaurant)
+  orders: Order[];
 }

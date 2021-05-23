@@ -17,6 +17,10 @@ import { AuthModule } from './auth/auth.module';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Category } from './restaurants/entities/category.entity';
 import { RestaurantsModule } from './restaurants/restaurants.module';
+import { OrdersModule } from './orders/orders.module';
+import { Dish } from './restaurants/entities/dish.entity';
+import { Order } from './orders/entities/order.entity';
+import { OrderItem } from './orders/entities/order-item.entity';
 const Joi = require('joi');
 
 @Module({
@@ -40,7 +44,7 @@ const Joi = require('joi');
       username: 'root',
       password: 'root',
       database: 'food-delivery',
-      entities: [User, Restaurant, Category],
+      entities: [User, Restaurant, Category, Dish, Order, OrderItem],
 
       synchronize: true,
       logging: false,
@@ -48,10 +52,12 @@ const Joi = require('joi');
     JwtModule.forRoot({
       privateKey: process.env.SECRET_KEY,
     }),
+
     UserModule,
     CommonUtilModule,
     AuthModule,
     RestaurantsModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [],
