@@ -1,6 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PubSub } from 'graphql-subscriptions';
+import {
+  NEW_COOKED_ORDER,
+  NEW_ORDER_UPDATE,
+  NEW_PENDING_ORDER,
+  PUB_SUB,
+} from 'src/common-util/common-util.constants';
 import { Dish } from 'src/restaurants/entities/dish.entity';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { Role, User } from 'src/user/entities/user.entity';
@@ -24,7 +30,8 @@ export class OrderService {
     @InjectRepository(Restaurant)
     private readonly restaurants: Repository<Restaurant>,
     @InjectRepository(Dish)
-    private readonly dishes: Repository<Dish>, // @Inject(PUB_SUB) private readonly pubSub: PubSub,
+    private readonly dishes: Repository<Dish>,
+    @Inject(PUB_SUB) private readonly pubSub: PubSub,
   ) {}
 
   async createOrder(
@@ -89,9 +96,11 @@ export class OrderService {
           items: orderItems,
         }),
       );
-      // await this.pubSub.publish(NEW_PENDING_ORDER, {
-      //   pendingOrders: { order, ownerId: restaurant.ownerId },
-      // });
+      // publish for owner to see his pending orders
+      await this.pubSub.publish(NEW_PENDING_ORDER, {
+        // payload - name of resolver
+        pendingOrders: { order, ownerId: restaurant.ownerId },
+      });
       return {
         ok: true,
         orderId: order.id,
@@ -237,19 +246,21 @@ export class OrderService {
           error: "You can't do that.",
         };
       }
+      // as we use this save for update , we dont get nothing
       await this.orders.save({
         id: orderId,
         status,
       });
       const newOrder = { ...order, status };
-      // if (user.role === Role.Owner) {
-      //   if (status === OrderStatus.Cooked) {
-      //     await this.pubSub.publish(NEW_COOKED_ORDER, {
-      //       cookedOrders: newOrder,
-      //     });
-      //   }
-      // }
-      // await this.pubSub.publish(NEW_ORDER_UPDATE, { orderUpdates: newOrder });
+      // if the owner set the status to cooked, give update to the delivery guy
+      if (user.role === Role.Owner) {
+        if (status === OrderStatus.Cooked) {
+          await this.pubSub.publish(NEW_COOKED_ORDER, {
+            cookedOrders: newOrder,
+          });
+        }
+      }
+      await this.pubSub.publish(NEW_ORDER_UPDATE, { orderUpdates: newOrder });
       return {
         ok: true,
       };
@@ -283,9 +294,9 @@ export class OrderService {
         id: orderId,
         driver,
       });
-      // await this.pubSub.publish(NEW_ORDER_UPDATE, {
-      //   orderUpdates: { ...order, driver },
-      // });
+      await this.pubSub.publish(NEW_ORDER_UPDATE, {
+        orderUpdates: { ...order, driver },
+      });
       return {
         ok: true,
       };

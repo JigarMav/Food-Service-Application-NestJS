@@ -369,5 +369,11 @@ input TakeOrderInput {
 }
 
 type Subscription {
-  takeOrder(input: TakeOrderInput!): Order!
+  pendingOrders: Order!
+  cookedOrders: Order!
+  orderUpdates(input: OrderUpdatesInput!): Order!
+}
+
+input OrderUpdatesInput {
+  id: Float!
 }

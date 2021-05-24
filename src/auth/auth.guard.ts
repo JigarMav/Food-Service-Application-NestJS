@@ -23,30 +23,25 @@ export class AuthGuard implements CanActivate {
     // current context is in HTTP .
     // convert to graphql context.
     const gqlContext = GqlExecutionContext.create(context).getContext();
-    const user: User = gqlContext.user;
-    if (!user) return false;
-    if (roles.includes('Any')) {
-      return true;
-    }
-    return roles.includes(user.role);
-    // const token = gqlContext.token;
-    // console.log('token authg', gqlContext.user);
+    const token = gqlContext.token;
+    // console.log('token authg', gqlContext.token);
     // verify jsontoken
-    // if (token) {
-    //   const decoded = this.jwtService.verify(token.toString());
-    //   if (typeof decoded === 'object' && decoded.hasOwnProperty('id')) {
-    //     const user = await this.userService.findById(decoded['id']);
-    //     console.log('Curr user', user.id);
-    //     if (user) {
-    //       gqlContext['user'] = user;
-    //       console.log('user role', user.role);
-    //       if (roles.includes('Any')) {
-    //         return true;
-    //       }
-    //       return roles.includes(user.role);
-    //     }
-    //   }
-    // }
-    // return false;
+    if (token) {
+      const decoded = this.jwtService.verify(token.toString());
+      if (typeof decoded === 'object' && decoded.hasOwnProperty('id')) {
+        const user = await this.userService.findById(decoded['id']);
+        // console.log('Curr user', user.id);
+        if (user) {
+          // set user in context so our @AuthUser decorator can access user.
+          gqlContext['user'] = user;
+          // console.log('user role', user.role);
+          if (roles.includes('Any')) {
+            return true;
+          }
+          return roles.includes(user.role);
+        }
+      }
+    }
+    return false;
   }
 }
