@@ -1,3 +1,4 @@
+/*eslint-disable */
 import { InternalServerErrorException } from '@nestjs/common';
 import {
   Field,
@@ -18,6 +19,7 @@ export enum Role {
   Delivery = 'Delivery',
   Admin = 'Admin',
 }
+
 registerEnumType(Role, {
   name: 'Role',
 });

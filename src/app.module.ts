@@ -1,3 +1,4 @@
+/* eslint-disable */
 import {
   MiddlewareConsumer,
   Module,
@@ -44,6 +45,7 @@ const Joi = require('joi');
         };
       },
     }),
+
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -56,6 +58,7 @@ const Joi = require('joi');
       synchronize: true,
       logging: false,
     }),
+
     JwtModule.forRoot({
       privateKey: process.env.SECRET_KEY,
     }),
